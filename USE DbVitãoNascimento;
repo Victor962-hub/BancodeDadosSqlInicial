@@ -1,0 +1,17 @@
+USE DbVitãoNascimento;
+GO
+
+CREATE TABLE Estudantes_new(
+    Id_Estudantes INT PRIMARY KEY,
+    Nome VARCHAR (100),
+    Turma VARCHAR(30)
+);
+
+CREATE TABLE Musicas(
+    Id_Musicas INT PRIMARY KEY, 
+    Titulo VARCHAR (50),
+    Artista VARCHAR (50),
+    Album VARCHAR (50),
+    duracao TIME NOT NULL 
+);
+
