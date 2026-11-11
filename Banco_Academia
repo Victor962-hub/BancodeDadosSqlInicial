@@ -192,3 +192,171 @@ SELECT Nome, Email
 FROM Alunos
 WHERE Nome LIKE '%es'; -- Ou Seja, Selecione os nomes e emails dos alunos onde o email termina com '@escola.com'
 
+
+-- Atualizando Dados Com UPDATE
+--UPDATE: Atualiza os dados de uma tabela. A sintaxe básica é: UPDATE nome_da_tabela SET nome_da_coluna = novo_valor WHERE condição;
+
+--CORRIGIR A TURMA DE UM ALUNMO ESPECIFICO 
+
+UPDATE Alunos 
+SET Turma = '2INFO-C'
+WHERE IdAluno = 3; --Altera a turma do aluno com IdAluno igual a 3 para 'INFO-B'
+
+SELECT * FROM Alunos;
+
+-- Registrar uma Rota e Encerrar a matricula do aluno 2 no curso 3
+
+UPDATE Matriculas 
+SET NotaFinal = 8.75, StatusMatricula = 'Concluida'
+WHERE IdAluno = 2 AND IdCurso = 3; --Altera a nota final e o status da matricula do aluno com IdAluno igual a 2 e IdCurso igual a 3
+
+SELECT * FROM Alunos;
+SELECT * FROM Matriculas;
+
+-- Conferir a Alterar da Turma do Aluno 3 
+
+SELECT * FROM Matriculas 
+WHERE IdAluno = 2 AND IdCurso = 3;
+
+
+SELECT * FROM Alunos;
+-- Desativar Alunos da Turma 2INFO-B
+UPDATE Alunos 
+SET Ativo = 0
+WHERE Turma = '2INFO-B';  -- Altera o status de ativo para 1 (ativo) para todos os alunos da turma '2INFO-B'
+
+--EXCLUINDO REGISTROS COM DELETE 
+--Delete: Exclui registros de uma tabela. A sintaxe básica é: DELETE FROM nome_da_Tabela WHERE Condição;
+
+INSERT INTO Alunos (Nome, Email, Turma, DataNascimento)
+VALUES ('Aluno de Teste', 'teste.remover@escola.com', '2INFO-A', '2008-01-01') --Insere um aluno de teste para ser removido posteriormente 
+
+SELECT * FROM Alunos
+WHERE Email = 'teste.remover@escola.com'; -- Seleciona o aluno de teste para verificar se ele foi inserido corretamente
+
+SELECT * FROM Alunos 
+
+DELETE FROM Alunos
+WHERE Email = 'teste.remover@escola.com'; -- Exclui o aluno de teste que foi inserido anteriormente
+
+SELECT * FROM Alunos
+WHERE Email = 'teste.remover@escola.com'; -- Selecionar o aluno de teste para verificar se ele foi inserido corretamente
+
+-- Funções de Texto e Data
+
+SELECT Nome, 
+UPPER(Nome) AS NomeEmMaisculo, --Converte o nome para maiúculo
+LOWER(Nome) AS NomeEmMaisculo, --Converte o nome para minúsculo
+LEN(Nome) AS QuantidadeDeCaracteres, --Retorna a quantidade de caracteres do nome
+CONCAT(Nome, ' - ', Turma) AS NomeETurma, -- Concatena o nome e a turma
+FORMAT(DataNascimento, 'dd/MM/yyyy') AS DataNascimentoFormatada, --Formata a data
+DATEDIFF (YEAR, DataNascimento, GETDATE()) AS IdadeAproximada --Calcula a Idade do Aluno
+FROM Alunos;
+
+SELECT * FROM Alunos;
+
+-- Funções de Calculo e agrupamento
+
+--quantidade de alunos cadastrados
+SELECT COUNT (*) AS QuantidadeDeAlunos
+FROM Alunos;
+
+--Quantidades de Matriculas que ja Possuem Nota Final
+SELECT COUNT (NotaFinal) AS QuantidadeMatriculasComNota
+FROM Matriculas;
+
+--Média, maior e menor nota; Obs: Dados Nulos (null) não são considerados nos cálculos
+SELECT 
+    AVG(NotaFinal) AS MediaDasNotas, -- Média da notas
+    MAX(NotaFinal) AS MaiorNota, --Maior Nota
+    MIN(NotaFinal) AS MenorNota --Menor nota
+FROM Matriculas;
+
+-- Troca null por um Texto para Exibir o Resultado de Forma mais Clara
+SELECT
+    IdMatricula, ISNULL(CONVERT(VARCHAR(10), NotaFinal), 'Sem Nota') AS NotaFinal, StatusMatricula
+FROM Matriculas;
+
+-- Group By e Having: Agrupa os Registros por uma ou mais colunas e permite filtar os grupos com base em uma condição.
+
+--Quantos Alunos Estão Matriculados em cada Turma
+SELECT Turma, COUNT(*) AS QuantidadeDeAlunos
+FROM Alunos
+GROUP BY Turma;
+ORDER BY QuantidadeDeAlunos DESC; --Ordena o resultado pela quantidade de alunos em ordem decrecente
+
+--Cursos que tem duas ou mais Matriculas
+SELECT IdCurso, COUNT(*) AS QuantidadeDeMatriculas
+FROM Matriculas
+GROUP BY IdCurso
+HAVING COUNT(*) >= 2
+ORDER BY QuantidadeDeMatriculasComNota DESC;
+
+--Relacionando tabelas com JOIN: permite combinar registros de duas ou mais tabelas com bases em uma condição de correspodência
+
+SELECT
+    a.Nome AS NomeDoAluno,
+    c.NomeCurso AS NomeDoCurso,
+    m.NotaFinal,
+    m.StatusMatricula
+FROM Matriculas AS m
+INNER JOIN Alunos AS a 
+    ON m.IdAluno = a.IdAluno -- Relaciona a tabela Matriculas com a tabela Alunos
+INNER JOIN Cursos AS C
+    ON m.IdCurso = c.IdCurso -- Relaciona a tabela Matriculas com a tabela Cursos
+ORDER BY a.Nome; -- Ordena o resultado pelo nome do aluno
+
+SELECT 
+a.Nome AS Alunos,
+a.Turma,
+c.NomeCurso AS Curso,
+p.nome AS professor,
+m.NotaFinal,
+m.StatusMatricula
+FROM Matriculas AS m 
+INNER JOIN Alunos AS a 
+    ON m.IdAluno = a.IdAluno --relaciona a tabela Matriculas com a tabela alunos
+INNER JOIN Cursos AS c
+    ON m.IdCurso = c.IdCurso -- Relaciona a tabelaa Matriculas com a tabela Cursos
+INNER JOIN Professores AS P
+    ON c.IdProfessor = p.IdProfessor --Relaciona a tabela professores com a tabela Professores
+ORDER BY p.Nome, c.NomeCurso, a.Nome; -- Ordena o resultado pelo nome do aluno
+
+-- left  retorna todos os registros dfa tabela a esquerda e os registros correspondentes da tabelas à diretia. se não houver correspondencia, os valores da tabeça à direitan serão nulos.
+
+SELECT 
+a.Nome As NomeDoAluno,
+c.NomeCurso As NomeDoCurso,
+m.NotaFinal,
+m.StatusMatricula
+FROM Alunos As a 
+LEFT JOIN Matriculas As m
+ON a.IdAluno = m.IdAluno -- Relaciona a tabela alunos com a tabela matricula
+LEFT JOIN cursos As c
+ON m.IdCurso = c.IdCurso -- Relaciona a tabela matricula com a tabela cursos ]
+WHERE m.IdMatricula IS NULL -- filtra os alunos que não possuem matricula
+
+-- Se a consulta nao retornar linhas, significa que todos os alunos possuem matricula em apenas um curso
+
+-- JOIN com filtro e media por curso: retorna a media das notas finais por curso, considerando apenas os alunos que possuem matricula
+SELECT 
+c.NomeCurso As curso,
+COUNT(m.IdMatricula) As TotalDeMatriculas,
+AVG(m.NotaFinal) As mediaDoCurso
+from Cursos As c
+LEFT JOIN Matriculas As m
+ON c.IdCurso = m.IdCurso -- relaciona a tabela cursos com atabela matriculas
+WHERE m.NotaFinal IS NOT NULL --filtra apenas as matriculas que possuem nota final 
+GROUP BY c.NomeCurso -- Agrupa o resultado pelo nome do curso 
+ORDER BY c.NomeCurso; --Ordena o resultado pelo nome do curso
+
+-- Os Dados:
+
+-- Erro: O e-email já foi usado por Alice
+INSERT INTO Matriculas (IdAluno, IdCurso, NotaFinal)
+VALUES (999, 1, 8.00);
+
+-- Erro: A nota não pode ser maior que 10
+UPDATE Matriculas
+SET NotaFinal = 12.00
+WHERE Idmatricula = 1;
